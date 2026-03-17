@@ -9,12 +9,13 @@ You can also include images in this folder and reference them in the markdown. E
 
 ## How it works
 
-Explain how your project works
+It creates pseudo-random 8-bit numbers.
 
 ## How to test
 
-Explain how to use your project
+Enter an 8-bit seed through the input pins and start the design by resetting it.
+...
 
 ## External hardware
 
-List external hardware used in your project (e.g. PMOD, LED display, etc), if any
+Input switches, seven segment display for output.
