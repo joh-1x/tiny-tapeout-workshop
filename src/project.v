@@ -25,21 +25,27 @@ module tt_um_joh1x_prng (
   wire _unused = &{ena, uio_in, 1'b0};
 
 
-  reg state;
+  reg state, next_state;
   localparam Start = 1'b0;
   localparam Work = 1'b1;
 
-  always @(posedge clk) begin
-    case(state)
-      Start: begin
-        state <= Work;
-      end
-      Work: begin
-      end
-    endcase
+  always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+      state <= Start;
+    end else begin
+      state <= next_state;
+    end
   end
 
-  always @(negedge rst_n) begin
-    state <= Start;
+  always @(*) begin
+    case (state)
+      Start: begin
+        next_state <= Work;
+      end
+      Work: begin
+        next_state <= Work;
+      end
+      default: next_state <= Start;
+    endcase
   end
 endmodule
