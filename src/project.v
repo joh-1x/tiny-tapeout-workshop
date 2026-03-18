@@ -17,17 +17,21 @@ module tt_um_joh1x_prng (
 );
 
   // All output pins must be assigned. If not used, assign to 0.
-  assign uo_out  = 8'h00;
-  assign uio_out = 8'h00;
+  //assign uo_out  = 8'h00;
+  //assign uio_out = 8'h00;
   assign uio_oe  = 8'hff; // enable all IOs as outputs
 
   // List all unused inputs to prevent warnings
-  wire _unused = &{ena, clk, rst_n, ui_in, uio_in, 1'b0};
+  wire _unused = &{ena, clk, rst_n, 1'b0};
 
 
   reg state, next_state;
   localparam Start = 1'b0;
   localparam Work = 1'b1;
+
+  reg [7:0] value;
+  assign uio_out = value;
+  assign uo_out = value;
 
   always @(posedge clk) begin //or negedge rst_n) begin
     //if (!rst_n) begin
@@ -41,9 +45,11 @@ module tt_um_joh1x_prng (
     case (state)
       Start: begin
         next_state = Work;
+        value = 8'h00;
       end
       Work: begin
         next_state = Work;
+        value = ui_in;
       end
       default: next_state = Start;
     endcase
