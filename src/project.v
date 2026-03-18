@@ -22,19 +22,19 @@ module tt_um_joh1x_prng (
   assign uio_oe  = 8'hff; // enable all IOs as outputs
 
   // List all unused inputs to prevent warnings
-  wire _unused = &{ena, ui_in, uio_in, 1'b0};
+  wire _unused = &{ena, clk, rst_n, uio_in, 1'b0};
 
 
   reg state, next_state;
   localparam Start = 1'b0;
   localparam Work = 1'b1;
 
-  always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
-      state <= Start;
-    end else begin
-      state <= next_state;
-    end
+  always @(posedge clk) begin //or negedge rst_n) begin
+    //if (!rst_n) begin
+    //  state <= Start;
+    //end else begin
+    //end
+    state <= next_state;
   end
 
   always @(*) begin
