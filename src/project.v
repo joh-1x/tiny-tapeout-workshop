@@ -36,7 +36,6 @@ module tt_um_joh1x_prng (
   always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         state <= Start;
-        next_state <= Start;
         value <= 0;
     end else begin
         state <= next_state;
