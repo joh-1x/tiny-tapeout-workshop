@@ -28,6 +28,7 @@ module tt_um_joh1x_prng (
   reg state, next_state;
   localparam Start = 1'b0;
   localparam Work = 1'b1;
+  reg [7:0] value;
 
   always @(posedge clk) begin //or negedge rst_n) begin
     //if (!rst_n) begin
@@ -35,6 +36,7 @@ module tt_um_joh1x_prng (
     //end else begin
     //end
     state <= next_state;
+    value <= ui_in;
   end
 
   always @(*) begin
