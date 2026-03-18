@@ -5,6 +5,22 @@ import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles
 
+def xorshift32(state):
+    # Ensure 32-bit integer
+    state &= 0xFFFFFFFF
+    
+    # Algorithm steps
+    state ^= (state << 13) & 0xFFFFFFFF
+    state ^= (state >> 17) & 0xFFFFFFFF
+    state ^= (state << 5) & 0xFFFFFFFF
+    
+    return state
+
+def high_bits(value):
+    return (value >> 24) & 0xFF
+
+def mixed_value(value):
+    return (value ^ (value >> 11) ^ (value >> 21)) & 0xFF
 
 @cocotb.test()
 async def test_project(dut):
@@ -20,8 +36,9 @@ async def test_project(dut):
 
     dut._log.info("Test project behavior")
 
+    seed = 17
     # Write seed
-    dut.ui_in.value = 20
+    dut.ui_in.value = seed
 
     # Do reset
     dut.rst_n.value = 0
@@ -31,11 +48,14 @@ async def test_project(dut):
 
     # See seed and initial test logic
     print(f"uo_out: {dut.uo_out.value}, uio_out: {dut.uio_out.value}")
-    assert dut.uo_out.value == 20
-    assert dut.uio_out.value == 20
+    assert dut.uo_out.value == 0
+    assert dut.uio_out.value == mixed_value(seed)
 
-    await ClockCycles(dut.clk, 1)
+    rng_state = seed
+    for i in range(10):
+        await ClockCycles(dut.clk, 1)
+        rng_state = xorshift32(rng_state)
 
-    print(f"uo_out: {dut.uo_out.value}, uio_out: {dut.uio_out.value}")
-    assert dut.uo_out.value == 21
-    assert dut.uio_out.value == 21
+        print(f"uo_out: {dut.uo_out.value}, uio_out: {dut.uio_out.value}")
+        assert dut.uo_out.value == 0
+        assert dut.uio_out.value == mixed_value(rng_state)

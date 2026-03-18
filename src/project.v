@@ -17,7 +17,7 @@ module tt_um_joh1x_prng (
 );
 
   // All output pins must be assigned. If not used, assign to 0.
-  //assign uo_out  = 8'h00;
+  assign uo_out  = 8'h00;
   //assign uio_out = 8'h00;
   assign uio_oe  = 8'hff; // enable all IOs as outputs
 
@@ -29,9 +29,17 @@ module tt_um_joh1x_prng (
   localparam Start = 1'b0;
   localparam Work = 1'b1;
 
-  reg [7:0] value;
-  assign uio_out = value;
-  assign uo_out = value;
+  reg [31:0] value;
+  wire [31:0] next_value;
+  xorshift32 prng (
+    .value(value),
+    .next_value(next_value)
+  );
+  wire [31:0] mixed_value;
+  assign mixed_value = value ^ (value >> 11) ^ (value >> 21);
+
+  //assign uio_out = value[31:24];
+  assign uio_out = mixed_value[7:0];
 
   always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
@@ -41,10 +49,11 @@ module tt_um_joh1x_prng (
         state <= next_state;
         case (state)
           Start: begin
-            value <= ui_in; // Load seed from input
+            value[7:0] <= ui_in; // Load seed from input
+            value[31:8] <= 0; // Clear upper bits
           end
           Work: begin
-            value <= value + 1; // Simple increment for demonstration
+            value <= next_value;
           end
         endcase
     end
@@ -60,5 +69,20 @@ module tt_um_joh1x_prng (
       end
       default: next_state = Start;
     endcase
+  end
+endmodule
+
+
+
+module xorshift32 (
+    input  wire [31:0] value,
+    output reg [31:0] next_value
+);
+  reg [31:0] x;
+  always @(*) begin
+    x = value;
+    x = x ^ (x << 13);
+    x = x ^ (x >> 17);
+    next_value = x ^ (x << 5);
   end
 endmodule
