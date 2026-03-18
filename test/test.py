@@ -27,13 +27,15 @@ async def test_project(dut):
     dut.rst_n.value = 0
     await ClockCycles(dut.clk, 1)
     dut.rst_n.value = 1
-    await ClockCycles(dut.clk, 1)
+    await ClockCycles(dut.clk, 2)
 
     # See seed and initial test logic
+    #print(f"uo_out: {dut.uo_out.value}, uio_out: {dut.uio_out.value}")
     assert dut.uo_out.value == 20
     assert dut.uio_out.value == 20
 
     await ClockCycles(dut.clk, 1)
 
+    #print(f"uo_out: {dut.uo_out.value}, uio_out: {dut.uio_out.value}")
     assert dut.uo_out.value == 21
     assert dut.uio_out.value == 21
