@@ -22,7 +22,7 @@ module tt_um_joh1x_prng (
   assign uio_oe  = 8'hff; // enable all IOs as outputs
 
   // List all unused inputs to prevent warnings
-  wire _unused = &{ena, clk, rst_n, 1'b0};
+  wire _unused = &{ena, clk, rst_n, ui_in, 1'b0};
 
 
   reg state, next_state;
@@ -33,23 +33,32 @@ module tt_um_joh1x_prng (
   assign uio_out = value;
   assign uo_out = value;
 
-  always @(posedge clk) begin //or negedge rst_n) begin
-    //if (!rst_n) begin
-    //  state <= Start;
-    //end else begin
-    //end
-    state <= next_state;
+  //reg just_released_reset;
+
+  always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        state <= Start;
+        next_state <= Start;
+        value <= ui_in;
+    end else begin
+        //if (just_released_reset) begin
+        //    state <= Start;  // hold Start for one cycle
+        //    just_released_reset <= 1'b0;
+        //end else begin
+        //    state <= next_state;
+        //end
+        state <= next_state;
+        value <= value + 1;
+    end
   end
 
   always @(*) begin
     case (state)
       Start: begin
-        next_state = Work;
-        value = 8'h00;
+        next_state = Start;
       end
       Work: begin
         next_state = Work;
-        value = ui_in;
       end
       default: next_state = Start;
     endcase
